@@ -45,6 +45,9 @@ add_executable(TimeTests raw/TimeTests.cpp ${HEADERS})
 add_executable(Throughput Throughput.cpp ${HEADERS})
 add_executable(ExclusiveThroughput ExclusiveThroughput.cpp ${HEADERS})
 add_executable(PingPong PingPong.cpp ${HEADERS})
+add_executable(ModifiedThroughput ModifiedThroughput.cpp ${HEADERS})
+add_executable(ModifiedPublisher ModifiedPublisher.cpp ${HEADERS})
+add_executable(ModifiedSubscriber ModifiedSubscriber.cpp ${HEADERS})
 
 target_include_directories(BasicPublisher
     PUBLIC ${AERON_CLIENT_SOURCE_PATH})
@@ -116,7 +119,6 @@ target_include_directories(Throughput
     PUBLIC ${AERON_CLIENT_SOURCE_PATH})
 target_link_libraries(Throughput
     ${CLIENT_LINK_LIB})
-
 target_include_directories(ExclusiveThroughput
     PUBLIC ${AERON_CLIENT_SOURCE_PATH})
 target_link_libraries(ExclusiveThroughput
@@ -133,14 +135,30 @@ target_include_directories(TimeTests
 target_link_libraries(TimeTests
     ${CMAKE_THREAD_LIBS_INIT})
 
+target_include_directories(ModifiedThroughput
+    PUBLIC ${AERON_CLIENT_SOURCE_PATH})
+target_link_libraries(ModifiedThroughput
+    ${CLIENT_LINK_LIB})
+
+target_include_directories(ModifiedPublisher
+    PUBLIC ${AERON_CLIENT_SOURCE_PATH})
+target_link_libraries(ModifiedPublisher
+    ${CLIENT_LINK_LIB})
+
+target_include_directories(ModifiedSubscriber
+    PUBLIC ${AERON_CLIENT_SOURCE_PATH})
+target_link_libraries(ModifiedSubscriber
+    ${CLIENT_LINK_LIB})
+
+
 add_dependencies(PingPong hdr_histogram)
 
 if (AERON_INSTALL_TARGETS)
     install(
         TARGETS
         BasicPublisher
-        TimeTests
         BasicSubscriber
+        TimeTests
         StreamingPublisher
         RateSubscriber
         Ping
@@ -153,5 +171,8 @@ if (AERON_INSTALL_TARGETS)
         PingW
         PongW
         RateSubscriberW
+        ModifiedThroughput
+        ModifiedPublisher
+        ModifiedSubscriber
         DESTINATION bin)
 endif ()
