@@ -27,6 +27,10 @@
 using namespace aeron::util;
 using namespace aeron;
 
+
+#pragma pack(push)
+#pragma pack(1)
+
 std::atomic<bool> running(true);
 
 void sigIntHandler(int)
@@ -71,21 +75,50 @@ fragment_handler_t printStringMessage()
 {
     return [&](const AtomicBuffer &buffer, util::index_t offset, util::index_t length, const Header &header)
     {
-        struct msg{
-            int id;
-            std::string msg;
-        };
+        
+        std::uint8_t type = buffer.overlayStruct<std::uint8_t>(offset);
 
-        msg m;
-        m = buffer.overlayStruct<msg>(offset);
+        switch(type){
+            case 1: {
 
-        std::cout
-            << "Message to stream " << header.streamId() << " from session " << header.sessionId()
-            << "(" << length << "@" << offset << ") <<"
-            << m.msg << ':'
-            << m.id << ' '
-            << ">>" << std::endl;
+                struct PriceMessage{
+                    std::uint8_t type;
+                    std::int64_t id;
+                    char content[16];
+                    long double price;
+                };
 
+                PriceMessage msg = buffer.overlayStruct<PriceMessage>(offset);
+
+                std::cout
+                    << "Message to stream " << header.streamId() << " from session " << header.sessionId()
+                    << "(" << length << "@" << offset << ") <<"
+                    << msg.content << ':'
+                    << msg.id << ':'
+                    << msg.price << ' '
+                    << ">>" << std::endl;
+
+                break;
+            }
+            default:{
+
+                struct Message{
+                    std::uint8_t type;
+                    std::int64_t id;
+                    char content[16];
+                };
+
+                Message msg = buffer.overlayStruct<Message>(offset);
+
+                std::cout
+                    << "Message to stream " << header.streamId() << " from session " << header.sessionId()
+                    << "(" << length << "@" << offset << ") <<"
+                    << msg.content << ':'
+                    << msg.id << ' '
+                    << ">>" << std::endl;
+
+            }
+        }
 
         /*
         std::cout
@@ -187,3 +220,5 @@ int main(int argc, char **argv)
 
     return 0;
 }
+
+#pragma pack(pop)

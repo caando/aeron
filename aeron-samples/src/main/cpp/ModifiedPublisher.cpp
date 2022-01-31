@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+
+
 #include <cstdint>
 #include <cstdio>
 #include <thread>
@@ -27,6 +29,9 @@
 
 using namespace aeron::util;
 using namespace aeron;
+
+#pragma pack(push)
+#pragma pack(1)
 
 std::atomic<bool> running(true);
 
@@ -136,21 +141,36 @@ int main(int argc, char **argv)
 #endif
 */
 
-            struct msg{
-                int id;
-                std::string msg;
-            };
+            int messageLen;
 
-            struct msg1{
-                int id;
-                std::string msg;
-                int price;
-            };
+            if (i & 1){
 
-            msg m = {i, "hello world"};
-            int messageLen = sizeof (m);
+                struct Message{
+                    std::uint8_t type;
+                    std::int64_t id;
+                    char content[16];
+                };
 
-            srcBuffer.putBytes(0, reinterpret_cast<std::uint8_t *>(&m), messageLen);
+                Message msg = {0, i, "hello world"};
+                messageLen = sizeof (msg);
+
+                srcBuffer.putBytes(0, reinterpret_cast<std::uint8_t *>(&msg), messageLen);
+
+            } else {
+
+                struct PriceMessage{
+                    std::uint8_t type;
+                    std::int64_t id;
+                    char content[16];
+                    long double price;
+                };
+
+                PriceMessage msg = {1, i, "hello world", 123.456};
+                messageLen = sizeof (msg);
+
+                srcBuffer.putBytes(0, reinterpret_cast<std::uint8_t *>(&msg), messageLen);
+
+            }
 
             std::cout << "offering " << i << "/" << settings.numberOfMessages << " - ";
             std::cout.flush();
@@ -217,3 +237,5 @@ int main(int argc, char **argv)
 
     return 0;
 }
+
+#pragma pack(pop)
